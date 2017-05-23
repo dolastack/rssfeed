@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import  Article, Feed
 from .forms import FeedForm
 from background_task import background
-import feedparser
-import datetime
 from django.utils import timezone
+
+import feedparser, datetime
+
 
 #from .tasks import feed_update
 
@@ -17,9 +19,20 @@ def articles_list(request):
     articles = Article.objects.all()
     #articles = list(set(articles))
     articles = sorted(articles, key=lambda art : art.pulication_date, reverse=True )
-    rows = [articles[x:x+1] for x in range(0, len(articles), 1)]
+    rowsd = [articles[x:x+1] for x in range(0, len(articles), 1)]
+    paginator = Paginator(rowsd, 50)
 
-    return render (request, 'news/articles_list.html' , {'rows' : rows})
+    page = request.GET.get('page')
+    try:
+        rows = paginator.page(page)
+    except PageNotAnInteger:
+        rows = paginator.page(1)
+    except EmptyPage:
+        rows = paginator.page(paginator.num_pages)
+
+    context = {'rows' : rows}
+
+    return render (request, 'news/articles_list.html' , context)
 
 def feeds_list(request):
     feeds = Feed.objects.all()
