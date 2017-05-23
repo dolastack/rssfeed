@@ -20,5 +20,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^news/', include('news.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^$', include('news.urls')),
+    url(r'^', include('news.urls')),
 ]

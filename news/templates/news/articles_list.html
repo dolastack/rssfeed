@@ -7,16 +7,16 @@
   <div class="container">
     <h1>Africa Gists</h1>
     <p>News from all over Africa.</p>
-    <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>
+  
   </div>
 </div>
 
 <div class="container">
   {% for row in rows %}
-    <div class="col-md-4">
+    <div class="col-md-6">
       {% for entry in row %}
         <h2>{{entry.title}}</h2>
-        <p>{{ enrty.description | safe }}</p>
+        <p>{{ entry.description | safe }}</p>
         <p>
           <a href="{{entry.url}}" target="_blank" class="btn btn-primary">Veiw Details</a>
         </p>
@@ -25,7 +25,7 @@
   {% endfor %}
 
   <footer>
-    <p>&copy; 2016 Company, Inc.</p>
+    <p>&copy; 2017 Company, Inc.</p>
   </footer>
 </div> <!-- /container -->
 
