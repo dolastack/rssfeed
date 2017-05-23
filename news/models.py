@@ -1,5 +1,5 @@
 from django.db import models
-import hashlib
+import hashlib, feedparser
 # Create your models here.
 
 
@@ -10,6 +10,7 @@ class Feed(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Article(models.Model):
     feed = models.ForeignKey(Feed)
@@ -23,6 +24,6 @@ class Article(models.Model):
         temp = self.title + self.pulication_date + self.url
         idm.update(temp.encode())
         self.article_id = idm.hexdigest()
-        
+
     def __str__(self):
         return self.title

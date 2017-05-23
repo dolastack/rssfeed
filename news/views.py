@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from .models import  Article, Feed
 from .forms import FeedForm
 from background_task import background
-import feedparser, threading, pytz
+import feedparser
 import datetime
-
+from django.utils import timezone
 
 #from .tasks import feed_update
 
@@ -35,14 +35,15 @@ def index(request):
 
 def save_article(dfeedData, dfeed):
     """save article to database"""
-    timezone = pytz.timezone("America/New_York")
+    #timezone = pytz.timezone("America/New_York")
     for entry in dfeedData.entries:
         article = Article()
         article.title = entry.title
         article.url = entry.link
         article.description = entry.description
-        d = datetime.datetime(*(entry.published_parsed[0:6]))
-        d = timezone.localize(d)
+        d = timezone.datetime(*(entry.published_parsed[0:6]))
+
+        #d = timezone.localize(d)
         dateString = d.strftime('%Y-%m-%d %H:%M:%S')
         article.pulication_date = dateString
         article.feed = dfeed
