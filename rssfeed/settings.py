@@ -77,8 +77,13 @@ WSGI_APPLICATION = 'rssfeed.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rssfeed',
+        'USER': 'dola',
+        'PASSWORD' : 'Lum1nou4',
+        'HOST': 'localhost',
+        'PORT': ''
+
     }
 }
 

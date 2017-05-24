@@ -20,7 +20,7 @@ def articles_list(request):
     #articles = list(set(articles))
     articles = sorted(articles, key=lambda art : art.pulication_date, reverse=True )
     rowsd = [articles[x:x+1] for x in range(0, len(articles), 1)]
-    paginator = Paginator(rowsd, 50)
+    paginator = Paginator(rowsd, 30)
 
     page = request.GET.get('page')
     try:
@@ -40,7 +40,7 @@ def feeds_list(request):
     return render(request, 'news/feeds_list.html', {'feeds': feeds})
 
 def index(request):
-    feed_update(repeat=300)
+    feed_update(repeat=180)
     articles = Article.objects.all()
     articles = sorted(articles, key=lambda art : art.pulication_date, reverse=True )
     rows = [articles[x:x+2] for x in range(0, len(articles), 1)]
