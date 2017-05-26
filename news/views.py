@@ -18,23 +18,13 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 display_list = getattr(settings, 'DISPLAY_LIST')
 
 
-@background(schedule=1)
-def get_articles_to_display():
-    print("whats up")
-    time_delta = datetime.datetime.now() + datetime.timedelta(days=30)
-    articles = Article.objects.filter(pulication_date__lte = time_delta)
-    for article in articles:
-        if article not in display_list:
-            display_list.append(article)
-        else:
-            pass
-    display_list = sorted(DISPLAY_LIST, key=lambda art : art.pulication_date, reverse=True )
-
-
+@cache_page(CACHE_TTL)
 def articles_list(request):
-    time_delta = datetime.datetime.now() + datetime.timedelta(days=30)
-    display_list = Article.objects.filter(pulication_date__lte = time_delta)
-    print ("this is len" ,len(display_list))
+    time_delta = datetime.datetime.now() - datetime.timedelta(days=20)
+
+    display_list = Article.objects.filter(pulication_date__gte = time_delta)
+    display_list = sorted(display_list, key=lambda art : art.pulication_date, reverse=True )
+
     rowsd = [display_list[x:x+1] for x in range(0, len(display_list), 1)]
     paginator = Paginator(rowsd, 30)
     page = request.GET.get('page')

@@ -12,10 +12,10 @@ from facebook import GraphAPIError
 #display_set
 # Create your views here.
 
+def get_feed_db():
+    feeds = Feed.objects.all()
 
-
-
-
+# facebook api
 def get_api(cfg):
   graph = facebook.GraphAPI(cfg['access_token'])
   # Get page token to post as the page. You can skip
@@ -27,6 +27,19 @@ def get_api(cfg):
       page_access_token = page['access_token']
   graph = facebook.GraphAPI(page_access_token)
   return graph
+
+@background(schedule=1)
+def get_articles_to_display():
+    print("whats up")
+    time_delta = datetime.datetime.now() + datetime.timedelta(days=30)
+    articles = Article.objects.filter(pulication_date__lte = time_delta)
+    for article in articles:
+        if article not in display_list:
+            display_list.append(article)
+        else:
+            pass
+    display_list = sorted(DISPLAY_LIST, key=lambda art : art.pulication_date, reverse=True )
+
 
 @background(schedule=10)
 def post_to_facebook():
@@ -44,7 +57,6 @@ def post_to_facebook():
             print("sent")
         except GraphAPIError:
             pass
-
 
 @background(schedule=20)
 def feed_update():
