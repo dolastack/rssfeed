@@ -4,24 +4,39 @@ from .models import  Article, Feed
 from .forms import FeedForm
 from background_task import background
 from django.utils import timezone
-
 import feedparser, datetime
+from .tasks import  save_article
 
 
-#from .tasks import feed_update
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
-#Articles to display
-#display_set
-# Create your views here.
+from django.views.decorators.cache import cache_page
+from django.conf import settings
+#from rssfeed.settings import display_list
+
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+display_list = getattr(settings, 'DISPLAY_LIST')
+
+
+@background(schedule=1)
+def get_articles_to_display():
+    print("whats up")
+    time_delta = datetime.datetime.now() + datetime.timedelta(days=30)
+    articles = Article.objects.filter(pulication_date__lte = time_delta)
+    for article in articles:
+        if article not in display_list:
+            display_list.append(article)
+        else:
+            pass
+    display_list = sorted(DISPLAY_LIST, key=lambda art : art.pulication_date, reverse=True )
+
 
 def articles_list(request):
-
-    articles = Article.objects.all()
-    #articles = list(set(articles))
-    articles = sorted(articles, key=lambda art : art.pulication_date, reverse=True )
-    rowsd = [articles[x:x+1] for x in range(0, len(articles), 1)]
+    time_delta = datetime.datetime.now() + datetime.timedelta(days=30)
+    display_list = Article.objects.filter(pulication_date__lte = time_delta)
+    print ("this is len" ,len(display_list))
+    rowsd = [display_list[x:x+1] for x in range(0, len(display_list), 1)]
     paginator = Paginator(rowsd, 30)
-
     page = request.GET.get('page')
     try:
         rows = paginator.page(page)
@@ -31,53 +46,14 @@ def articles_list(request):
         rows = paginator.page(paginator.num_pages)
 
     context = {'rows' : rows}
-
     return render (request, 'news/articles_list.html' , context)
 
+@cache_page(CACHE_TTL)
 def feeds_list(request):
     feeds = Feed.objects.all()
-    #FEED_LIST = feeds
     return render(request, 'news/feeds_list.html', {'feeds': feeds})
 
-def index(request):
-    feed_update(repeat=180)
-    articles = Article.objects.all()
-    articles = sorted(articles, key=lambda art : art.pulication_date, reverse=True )
-    rows = [articles[x:x+2] for x in range(0, len(articles), 1)]
-    return render (request, 'news/articles_list.html' , {'rows' : rows})
 
-def save_article(dfeedData, dfeed):
-    """save article to database"""
-    #timezone = pytz.timezone("America/New_York")
-    for entry in dfeedData.entries:
-        article = Article()
-        article.title = entry.title
-        article.url = entry.link
-        article.description = entry.description
-        d = timezone.datetime(*(entry.published_parsed[0:6]))
-
-        #d = timezone.localize(d)
-        dateString = d.strftime('%Y-%m-%d %H:%M:%S')
-        article.pulication_date = dateString
-        article.feed = dfeed
-        article.setID()
-        article.save()
-
-
-@background(schedule=10)
-def feed_update():
-    """background task to get update from feed """
-
-    FEED_LIST = Feed.objects.all()
-    for feed in FEED_LIST:
-        feedData = feedparser.parse(feed.url)
-        if feedData.status == 304:
-            # no changes
-            pass
-        else:
-            feed.title = feedData.feed.title
-            feed.save()
-            save_article(feedData,feed)
 
 def new_feed(request):
     """to create new feed"""

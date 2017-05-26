@@ -16,6 +16,14 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
+from news.tasks import post_to_facebook, feed_update
+from news.views import get_articles_to_display
+
+#Run the background task to update feed
+get_articles_to_display(repeat=30)
+#feed_update(repeat=180)
+#post_to_facebook(repeat=120)
+
 
 urlpatterns = [
     url(r'^news/', include('news.urls')),
