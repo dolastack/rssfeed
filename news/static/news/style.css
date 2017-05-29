@@ -8,7 +8,9 @@
     height: 190px;
 
 }
-
+.navbar {
+  height: 5px;
+}
 .pagination {
   align-self: baseline;
 }

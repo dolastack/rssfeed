@@ -22,7 +22,7 @@ display_list = getattr(settings, 'DISPLAY_LIST')
 def articles_list(request):
     time_delta = datetime.datetime.now() - datetime.timedelta(days=20)
 
-    display_list = Article.objects.filter(pulication_date__gte = time_delta).order_by("-pulication_date")
+    display_list = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
 
     rowsd = [display_list[x:x+1] for x in range(0, len(display_list), 1)]
     paginator = Paginator(rowsd, 30)
