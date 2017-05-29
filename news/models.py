@@ -11,7 +11,6 @@ class Feed(models.Model):
     def __str__(self):
         return self.title
 
-
 class Article(models.Model):
     feed = models.ForeignKey(Feed)
     title = models.CharField(max_length=200)

@@ -12,9 +12,8 @@ from facebook import GraphAPIError
 #display_set
 # Create your views here.
 
-def get_feed_db():
-    feeds = Feed.objects.all()
 
+DISPLAYED_ARTICLES = []
 # facebook api
 def get_api(cfg):
   graph = facebook.GraphAPI(cfg['access_token'])
@@ -28,35 +27,31 @@ def get_api(cfg):
   graph = facebook.GraphAPI(page_access_token)
   return graph
 
-@background(schedule=1)
-def get_articles_to_display():
-    print("whats up")
-    time_delta = datetime.datetime.now() + datetime.timedelta(days=30)
-    articles = Article.objects.filter(pulication_date__lte = time_delta)
-    for article in articles:
-        if article not in display_list:
-            display_list.append(article)
-        else:
-            pass
-    display_list = sorted(DISPLAY_LIST, key=lambda art : art.pulication_date, reverse=True )
-
-
 @background(schedule=10)
 def post_to_facebook():
-    articles = Article.objects.all()
-    articles = sorted(articles, key=lambda art : art.pulication_date, reverse=True )
-    cfg = {
-    "page_id"      : "216809822168608",  # Step 1
-    "access_token" : "EAAUQOV9z9PUBAOA9cCLMQm4WnaEzJ413txqNoTYrw9ZBe0LsJszcAZBcVeeAVVerqJYpNihuooF7ZCkCQSZBkGZCJzdPwTKKU5JZAlczNV1kXSYJUh0vo04CvRIvgQVhRZA9qXX2iUQS8XXjfYcFOpVrhx8zLr2ZCCAZD"   # Step 3
-    }
-    api = get_api(cfg)
-
+    """Post new articles to facebook"""
+    print("sending to face")
+    NEW_ARTICLES = []
+    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=60)
+    display_list = Article.objects.filter(pulication_date__gte = time_delta).order_by("-pulication_date")
     for article in articles:
-        try:
-            status = api.put_wall_post(article)
-            print("sent")
-        except GraphAPIError:
-            pass
+        if article not in DISPLAYED_ARTICLES:
+            NEW_ARTICLES.append(article)
+            DISPLAYED_ARTICLES.append(article)
+    print ("the lenght here" ,len(NEW_ARTICLES), " and ", len(DISPLAYED_ARTICLES))
+    if  len(NEW_ARTICLES) > 0:
+        NEW_ARTICLES = sorted(NEW_ARTICLES, key=lambda art : art.pulication_date, reverse=True )
+        cfg = {
+        "page_id"      : "216809822168608",  # Step 1
+        "access_token" : "EAAUQOV9z9PUBAOA9cCLMQm4WnaEzJ413txqNoTYrw9ZBe0LsJszcAZBcVeeAVVerqJYpNihuooF7ZCkCQSZBkGZCJzdPwTKKU5JZAlczNV1kXSYJUh0vo04CvRIvgQVhRZA9qXX2iUQS8XXjfYcFOpVrhx8zLr2ZCCAZD"   # Step 3
+        }
+        api = get_api(cfg)
+
+        for NEW_ARTICLE in NEW_ARTICLES:
+            try:
+                status = api.put_wall_post(NEW_ARTICLE)
+            except GraphAPIError:
+                pass
 
 @background(schedule=20)
 def feed_update():
@@ -74,8 +69,9 @@ def feed_update():
             feed.save()
             save_article(feedData,feed)
 
+
 def save_article(dfeedData, dfeed):
-    """save article to database"""
+    """ get articles from feeds and save article to database"""
     #timezone = pytz.timezone("America/New_York")
     for entry in dfeedData.entries:
         article = Article()

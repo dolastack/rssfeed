@@ -1,0 +1,11 @@
+.jumbotron {
+    background-color: green;
+}
+
+.pagination {
+  align-self: baseline;
+}
+
+footer {
+  align: center;
+}
