@@ -1,5 +1,12 @@
 .jumbotron {
-    background-color: green;
+    border-width: thick;
+    border-color: red;
+    background-image: url("africa.png");
+    background-repeat: no-repeat;
+    background-position: right;
+    background-color: pink;
+    height: 190px;
+
 }
 
 .pagination {
