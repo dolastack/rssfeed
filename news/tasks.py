@@ -27,7 +27,7 @@ def get_api(cfg):
   graph = facebook.GraphAPI(page_access_token)
   return graph
 
-@background(schedule=10)
+#@background(schedule=10)
 def post_to_facebook():
     """Post new articles to facebook"""
     print("sending to face")
@@ -40,7 +40,7 @@ def post_to_facebook():
             DISPLAYED_ARTICLES.append(article)
     print ("the lenght here" ,len(NEW_ARTICLES), " and ", len(DISPLAYED_ARTICLES))
     if  len(NEW_ARTICLES) > 0:
-        NEW_ARTICLES = sorted(NEW_ARTICLES, key=lambda art : art.pulication_date, reverse=True )
+        NEW_ARTICLES = sorted(NEW_ARTICLES, key=lambda art : art.publication_date, reverse=True )
         cfg = {
         "page_id"      : "216809822168608",  # Step 1
         "access_token" : "EAAUQOV9z9PUBAOA9cCLMQm4WnaEzJ413txqNoTYrw9ZBe0LsJszcAZBcVeeAVVerqJYpNihuooF7ZCkCQSZBkGZCJzdPwTKKU5JZAlczNV1kXSYJUh0vo04CvRIvgQVhRZA9qXX2iUQS8XXjfYcFOpVrhx8zLr2ZCCAZD"   # Step 3
@@ -56,9 +56,7 @@ def post_to_facebook():
 @background(schedule=20)
 def feed_update():
     """background task to get update from feed """
-
     FEED_LIST = Feed.objects.all()
-
     for feed in FEED_LIST:
         feedData = feedparser.parse(feed.url)
         if feedData.status == 304:

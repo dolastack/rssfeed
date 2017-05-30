@@ -18,6 +18,7 @@ class Article(models.Model):
     description = models.TextField()
     publication_date = models.DateTimeField()
     article_id = models.CharField(max_length=200, primary_key=True)
+
     def setID(self):
         idm = hashlib.sha1()
         temp = self.title + self.publication_date + self.url

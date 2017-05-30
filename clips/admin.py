@@ -8,16 +8,16 @@ class VideoFeedAdmin(admin.ModelAdmin):
     list_display = ('title', 'url')
 
 class YoutubeFeedAdmin(admin.ModelAdmin):
+    list_display = ('title', 'url')
     def save_model(self, request, obj, form, change):
         if request.method == "POST":
             form = YoutubeFeedForm(request.POST)
             if form.is_valid():
                 youtube_feed = form.save(commit=False)
                 existingFeed = YoutubeFeed.objects.filter(external_id = youtube_feed.external_id)
-                abs_url = youtube_feed.url + "?channel_id=" + youtube_feed.external_id
 
                 if len(existingFeed) == 0:
-                    feedData = feedparser.parse(abs_url)
+                    feedData = feedparser.parse(full_url)
                     youtube_feed.title =  feedData.feed.title
                     youtube_feed.save()
                     save_video(feedData, youtube_feed)

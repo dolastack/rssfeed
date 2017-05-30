@@ -20,19 +20,17 @@ display_list = getattr(settings, 'DISPLAY_LIST')
 
 #@cache_page(CACHE_TTL)
 def articles_list(request):
-    time_delta = datetime.datetime.now() - datetime.timedelta(days=20)
-
+    time_delta = datetime.datetime.now() - datetime.timedelta(days=15)
     display_list = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
 
     rowsd = [display_list[x:x+1] for x in range(0, len(display_list), 1)]
-    paginator = Paginator(rowsd, 30)
+    paginator = Paginator(rowsd, 20)
     page = request.GET.get('page')
     videos = get_videos()
-    video_paginator = Paginator(videos, 20)
-
+    video_paginator = Paginator(videos, 15)
     try:
         rows = paginator.page(page)
-        vid = video_paginator(page)
+        vid = video_paginator.page(page)
     except PageNotAnInteger:
         rows = paginator.page(1)
         vid = video_paginator.page(1)

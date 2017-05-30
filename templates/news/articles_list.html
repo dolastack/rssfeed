@@ -6,9 +6,10 @@
 <hr />
 <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="col-xs-12 col-sm-7">
+
   <div class="jumbotron">
 
-    <font size=8><strong><p>Africa News Aggregate</p></strong></font>
+    <p><font size=6><strong>Africa News Aggregate</strong></font></p>
     <p>News, Stories & Articles from all over Africa.</p>
 
   </div>
@@ -26,7 +27,7 @@
   {% endfor %}
 <hr />
 
-    <div class="pagination" >
+    <div class="pagination">
       <strong> <font size="5">
       <span class="step-links">
           {% if rows.has_previous %}
@@ -41,15 +42,15 @@
       </span>
       </font></strong>
    </div>
+
    </div><!--/.col-xs-12.col-sm-9-->
 
-   <div class="col-xs-6 col-sm-4 sidebar-offcanvas" id="sidebar">
-
+   <div class="col-xs-12 col-sm-5 sidebar-offcanvas" id="sidebar">
      <div class="panel panel-primary">
         <div class="panel-heading">Clips of the Day</div>
      {% for video in vid  %}
-        <h3>{{ video.title }}</h3>
-       <iframe  width="355" height="320" src="{{ video.embed_code }}" frameborder="0"></iframe>
+        <h4>{{ video.title }}</h4>
+       <iframe  width="400" height="320" src="{{ video.embed_code }}" frameborder="0"></iframe>
     {% endfor %}
 
     <div class="pagination" >
@@ -68,6 +69,6 @@
       </font></strong>
    </div>
  </div>
-   </div><!--/.sidebar-offcanvas-->
+</div><!--/.sidebar-offcanvas-->
 
 {% endblock %}

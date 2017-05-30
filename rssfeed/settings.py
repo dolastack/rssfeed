@@ -139,7 +139,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-DISPLAY_LIST = []
+DISPLAY_LIST = ['127.0.0.1', '54.212.200.82']
 
 
 EMBED_VIDEO_BACKENDS = (

@@ -1,5 +1,6 @@
-from .models import YoutubeVideo
+from .models import YoutubeVideo, YoutubeFeed
 import datetime
+import feedparser
 from background_task import background
 
 
@@ -12,10 +13,9 @@ def save_video(feedData, video_feed):
 
         d = datetime.datetime(*(entry.published_parsed[0:6]))
         dateString = d.strftime('%Y-%m-%d %H:%M:%S')
-
         video.publication_date = dateString
         video.video_feed = video_feed
-        video.get_embed_code()
+        #video.get_embed_code()
         video.setID()
         video.save()
 
@@ -25,8 +25,8 @@ def youtube_feed_update():
     FEED_LIST = YoutubeFeed.objects.all()
 
     for youtube_feed in FEED_LIST:
-        abs_url = youtube_feed.url + "?channel_id=" + youtube_feed.external_id
-        feedData = feedparser.parse(abs_url)
+        
+        feedData = feedparser.parse(youtube_feed.full_url)
         if feedData.status == 304:
             # no changes
             pass

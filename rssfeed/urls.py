@@ -22,8 +22,8 @@ from clips.tasks import youtube_feed_update
 #Run the background task to update feed
 #get_articles_to_display(repeat=30)
 #post_to_facebook(repeat=120)
-feed_update(repeat=180)
-youtube_feed_update(repeat=600)
+#feed_update(repeat=180)
+youtube_feed_update(repeat=120)
 
 urlpatterns = [
     url(r'^news/', include('news.urls')),
