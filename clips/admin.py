@@ -15,7 +15,7 @@ class YoutubeFeedAdmin(admin.ModelAdmin):
                 youtube_feed = form.save(commit=False)
                 existingFeed = YoutubeFeed.objects.filter(external_id = youtube_feed.external_id)
                 abs_url = youtube_feed.url + "?channel_id=" + youtube_feed.external_id
-                
+
                 if len(existingFeed) == 0:
                     feedData = feedparser.parse(abs_url)
                     youtube_feed.title =  feedData.feed.title

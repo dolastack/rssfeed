@@ -2,9 +2,8 @@
 {% extends "base.html" %}
 {% load embed_video_tags %}
 
-
 {% block content %}
-
+<hr />
 <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="col-xs-12 col-sm-7">
   <div class="jumbotron">
@@ -44,19 +43,31 @@
    </div>
    </div><!--/.col-xs-12.col-sm-9-->
 
-   <div class="col-xs-6 col-sm-5 sidebar-offcanvas" id="sidebar">
-     <div class="jumbotron">
+   <div class="col-xs-6 col-sm-4 sidebar-offcanvas" id="sidebar">
 
-       <h2>Clips of the day</h2>
-
-     </div>
-
-     {% for dvideo in videos  %}
-        <h3>{{ dvideo.title }}</h3>
-       <iframe  width="420" height="345" src="{{ dvideo.embed_code }}" frameborder="0"></iframe>
-
+     <div class="panel panel-primary">
+        <div class="panel-heading">Clips of the Day</div>
+     {% for video in vid  %}
+        <h3>{{ video.title }}</h3>
+       <iframe  width="355" height="320" src="{{ video.embed_code }}" frameborder="0"></iframe>
     {% endfor %}
 
+    <div class="pagination" >
+      <strong> <font size="5">
+      <span class="step-links">
+          {% if vid.has_previous %}
+              <a href="?page={{ vid.previous_page_number }}">Previous</a>
+          {% endif %}
+          <span class="current">
+              Page {{ vid.number }} of {{ vid.paginator.num_pages }}
+          </span>
+          {% if vid.has_next %}
+              <a href="?page={{ vid.next_page_number }}"> Next</a>
+          {% endif %}
+      </span>
+      </font></strong>
+   </div>
+ </div>
    </div><!--/.sidebar-offcanvas-->
 
 {% endblock %}

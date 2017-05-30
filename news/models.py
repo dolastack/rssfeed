@@ -20,7 +20,7 @@ class Article(models.Model):
     article_id = models.CharField(max_length=200, primary_key=True)
     def setID(self):
         idm = hashlib.sha1()
-        temp = self.title + self.pulication_date + self.url
+        temp = self.title + self.publication_date + self.url
         idm.update(temp.encode())
         self.article_id = idm.hexdigest()
 

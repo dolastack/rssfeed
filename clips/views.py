@@ -5,7 +5,7 @@ import datetime
 
 def videos_list(request):
     videos = YoutubeVideo.objects.all()
-    
+
     context = {'videos': videos}
     template = 'base.html'
     return render(request, template, context)

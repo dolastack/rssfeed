@@ -5,16 +5,26 @@
     background-repeat: no-repeat;
     background-position: right;
     background-color: pink;
-    height: 190px;
-
+    height: 220px;
 }
-.navbar {
+.nav {
   height: 5px;
 }
 .pagination {
   align-self: baseline;
-}
 
+}
+.panel {
+  border-width: medium;
+  border-color: OrangeRed;
+  align-content: center;
+  border-style: groove;
+  text-align: center;
+}
+.panel-heading {
+  
+  text-align: center;
+}
 footer {
   align: center;
 }

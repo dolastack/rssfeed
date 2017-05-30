@@ -32,5 +32,4 @@ class YoutubeVideo(Video):
         regex_str = r'(https:\/\/www.youtube.com\/)watch\?v\=(.+)'
         regex = re.compile(regex_str)
         matches = regex.findall(self.url)
-        print("here ", matches )
         self.embed_code = matches[0][0] + "embed/" + matches[0][1]

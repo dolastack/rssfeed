@@ -27,15 +27,21 @@ def articles_list(request):
     rowsd = [display_list[x:x+1] for x in range(0, len(display_list), 1)]
     paginator = Paginator(rowsd, 30)
     page = request.GET.get('page')
+    videos = get_videos()
+    video_paginator = Paginator(videos, 20)
+
     try:
         rows = paginator.page(page)
+        vid = video_paginator(page)
     except PageNotAnInteger:
         rows = paginator.page(1)
+        vid = video_paginator.page(1)
+
     except EmptyPage:
         rows = paginator.page(paginator.num_pages)
-    videos = get_videos()
-    
-    context = {'rows' : rows, 'videos':videos}
+        vid = video_paginator.page(video_paginator.num_pages)
+
+    context = {'rows' : rows, 'vid':vid}
     return render (request, 'news/articles_list.html' , context)
 
 @cache_page(CACHE_TTL)

@@ -81,7 +81,7 @@ def save_article(dfeedData, dfeed):
         d = datetime.datetime(*(entry.published_parsed[0:6]))
         #d = timezone.localize(d)
         dateString = d.strftime('%Y-%m-%d %H:%M:%S')
-        article.pulication_date = dateString
+        article.publication_date = dateString
         article.feed = dfeed
         article.setID()
         article.save()
