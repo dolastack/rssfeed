@@ -19,13 +19,12 @@ def save_video(feedData, video_feed):
         video.setID()
         video.save()
 
-@background(schedule=20)
+@background(schedule=15)
 def youtube_feed_update():
     """background task to get update from feed """
     FEED_LIST = YoutubeFeed.objects.all()
-
     for youtube_feed in FEED_LIST:
-        
+
         feedData = feedparser.parse(youtube_feed.full_url)
         if feedData.status == 304:
             # no changes

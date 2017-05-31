@@ -1,0 +1,28 @@
+
+{% block videos %}
+<div class="col-xs-12 col-sm-4 sidebar-offcanvas" id="sidebar">
+  <div class="panel panel-primary">
+     <div class="panel-heading"><font size="5">Clips of the Day</font></div>
+  {% for video in vid  %}
+     <h4>{{ video.title }}</h4>
+    <iframe  width="350" height="320" src="{{ video.embed_code }}" frameborder="0"></iframe>
+ {% endfor %}
+
+ <div class="pagination" >
+   <strong> <font size="5">
+   <span class="step-links">
+       {% if vid.has_previous %}
+           <a href="?page={{ vid.previous_page_number }}">Previous</a>
+       {% endif %}
+       <span class="current">
+           Page {{ vid.number }} of {{ vid.paginator.num_pages }}
+       </span>
+       {% if vid.has_next %}
+           <a href="?page={{ vid.next_page_number }}"> Next</a>
+       {% endif %}
+   </span>
+   </font></strong>
+</div>
+</div>
+</div><!--/.sidebar-offcanvas-->
+{% endblock videos %}
