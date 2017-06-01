@@ -25,7 +25,7 @@ SECRET_KEY = 'z_6%d^+%kd$cwr+oo)^v7jay36!j#-jjun88r)99&se79%gtjo'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '54.212.200.82']
 
 
 # Application definition
@@ -139,7 +139,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-DISPLAY_LIST = ['127.0.0.1', '54.212.200.82']
+DISPLAY_LIST = []
 
 
 EMBED_VIDEO_BACKENDS = (

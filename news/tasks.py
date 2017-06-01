@@ -32,8 +32,9 @@ def post_to_facebook():
     """Post new articles to facebook"""
     print("sending to face")
     NEW_ARTICLES = []
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=60)
-    display_list = Article.objects.filter(pulication_date__gte = time_delta).order_by("-pulication_date")
+    time_delta = datetime.datetime.now(tzinfo=datetime.timezone.utc) - datetime.timedelta(minutes=60)
+    time_delta_tz = time_delta.astimezone()
+    display_list = Article.objects.filter(pulication_date__gte = time_delta_tz).order_by("-pulication_date")
     for article in articles:
         if article not in DISPLAYED_ARTICLES:
             NEW_ARTICLES.append(article)
@@ -76,9 +77,9 @@ def save_article(dfeedData, dfeed):
         article.title = entry.title
         article.url = entry.link
         article.description = entry.description
-        d = datetime.datetime(*(entry.published_parsed[0:6]))
-        #d = timezone.localize(d)
-        dateString = d.strftime('%Y-%m-%d %H:%M:%S')
+        ptime = datetime.datetime(*(entry.published_parsed[0:6]), tzinfo=datetime.timezone.utc)
+        ptimetz = ptime.astimezone()
+        dateString = ptimetz.strftime('%Y-%m-%d %H:%M:%S')
         article.publication_date = dateString
         article.feed = dfeed
         article.setID()

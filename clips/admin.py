@@ -17,7 +17,7 @@ class YoutubeFeedAdmin(admin.ModelAdmin):
                 existingFeed = YoutubeFeed.objects.filter(external_id = youtube_feed.external_id)
 
                 if len(existingFeed) == 0:
-                    feedData = feedparser.parse(full_url)
+                    feedData = feedparser.parse(youtube_feed.full_url)
                     youtube_feed.title =  feedData.feed.title
                     youtube_feed.save()
                     save_video(feedData, youtube_feed)

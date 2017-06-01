@@ -1,7 +1,7 @@
 from django.db import models
 import hashlib, feedparser
 # Create your models here.
-
+import datetime
 
 class Feed(models.Model):
     title = models.CharField(max_length=200)

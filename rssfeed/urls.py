@@ -26,6 +26,7 @@ feed_update(repeat=180)
 youtube_feed_update(repeat=300)
 
 urlpatterns = [
+    url(r'^videos/', include('clips.urls')),
     url(r'^news/', include('news.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^', include('news.urls')),

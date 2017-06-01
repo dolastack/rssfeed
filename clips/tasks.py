@@ -11,8 +11,9 @@ def save_video(feedData, video_feed):
         video.description = entry.description
         video.url = entry.link
 
-        d = datetime.datetime(*(entry.published_parsed[0:6]))
-        dateString = d.strftime('%Y-%m-%d %H:%M:%S')
+        ptime = datetime.datetime(*(entry.published_parsed[0:6]), tzinfo=datetime.timezone.utc)
+        ptimetz = ptime.astimezone()
+        dateString = ptimetz.strftime('%Y-%m-%d %H:%M:%S')
         video.publication_date = dateString
         video.video_feed = video_feed
         #video.get_embed_code()
