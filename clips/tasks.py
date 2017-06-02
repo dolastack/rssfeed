@@ -23,7 +23,7 @@ def get_api(cfg):
       page_access_token = page['access_token']
   graph = facebook.GraphAPI(page_access_token)
   return graph
-  
+
 api = get_api(cfg)
 
 @background(schedule=500)
@@ -66,7 +66,7 @@ def save_video(feedData, video_feed):
         video.setID()
         video.save()
 
-@background(schedule=100)
+@background(schedule=50)
 def youtube_feed_update():
     """background task to get update from feed """
     FEED_LIST = YoutubeFeed.objects.all()

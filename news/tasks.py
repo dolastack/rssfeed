@@ -39,7 +39,7 @@ def post_to_facebook():
     """Post new articles to facebook"""
 
     NEW_ARTICLES = []
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=15)
+    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=30)
 
     articles = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
     for article in articles:
