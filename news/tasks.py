@@ -39,7 +39,7 @@ def post_to_facebook():
     """Post new articles to facebook"""
 
     NEW_ARTICLES = []
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=60)
+    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=15)
 
     articles = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
     for article in articles:
@@ -49,15 +49,14 @@ def post_to_facebook():
 
     if  len(NEW_ARTICLES) > 0:
         #NEW_ARTICLES = sorted(NEW_ARTICLES, key=lambda art : art.publication_date, reverse=True )
+        for temp in NEW_ARTICLES:
 
-
-        temp = NEW_ARTICLES[-1]
-        attachment = {"name":temp.title ,  "link" :temp.url ,
-                      "description": temp.description}
-        try:
-            status = api.put_wall_post(temp.title, attachment)
-        except GraphAPIError:
-            print("There is a problem ", GraphAPIError)
+            attachment = {"name":temp.title ,  "link" :temp.url ,
+                          "description": temp.description}
+            try:
+                status = api.put_wall_post(temp.title, attachment)
+            except GraphAPIError:
+                print("There is a problem ", GraphAPIError)
 
 @background(schedule=60)
 def feed_update():

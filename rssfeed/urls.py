@@ -18,13 +18,8 @@ from django.contrib import admin
 from clips.tasks import youtube_feed_update, post_video_to_facebook
 from news.tasks import post_to_facebook, feed_update
 
-
-
 #Run the background task to update feed
 #get_articles_to_display(repeat=30)
-
-
-
 
 post_to_facebook( repeat=1000 )
 feed_update(repeat=350)
