@@ -15,6 +15,11 @@ from facebook import GraphAPIError
 
 DISPLAYED_ARTICLES = []
 # facebook api
+cfg = {
+"page_id"      : "216809822168608",  # Step 1
+"access_token" : "EAAL3F6fnlNkBAMXksivgtM6XFSZBcbmHRJUG3MogBPz2hsuZAPXaG0ky8C1TbxZAJZAOCgT5V2hFocJlWaBW6VRXiYmEt4twneETXeZCuPvbJxNrhNyZAHKHjNR3upSBU3fmHZAQ3TZA3Ky06HjZAoAy1zHpzYewlM20ZD"   # Step 3
+}
+
 def get_api(cfg):
   graph = facebook.GraphAPI(cfg['access_token'])
   # Get page token to post as the page. You can skip
@@ -27,34 +32,34 @@ def get_api(cfg):
   graph = facebook.GraphAPI(page_access_token)
   return graph
 
-@background(schedule=10)
+api = get_api(cfg)
+
+@background(schedule=300)
 def post_to_facebook():
     """Post new articles to facebook"""
-    print("sending to face")
+
     NEW_ARTICLES = []
-    time_delta = datetime.datetime.now(tzinfo=datetime.timezone.utc) - datetime.timedelta(minutes=60)
-    time_delta_tz = time_delta.astimezone()
-    display_list = Article.objects.filter(pulication_date__gte = time_delta_tz).order_by("-pulication_date")
+    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=60)
+
+    articles = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
     for article in articles:
         if article not in DISPLAYED_ARTICLES:
             NEW_ARTICLES.append(article)
             DISPLAYED_ARTICLES.append(article)
-    print ("the lenght here" ,len(NEW_ARTICLES), " and ", len(DISPLAYED_ARTICLES))
+
     if  len(NEW_ARTICLES) > 0:
-        NEW_ARTICLES = sorted(NEW_ARTICLES, key=lambda art : art.publication_date, reverse=True )
-        cfg = {
-        "page_id"      : "216809822168608",  # Step 1
-        "access_token" : "EAAL3F6fnlNkBAMXksivgtM6XFSZBcbmHRJUG3MogBPz2hsuZAPXaG0ky8C1TbxZAJZAOCgT5V2hFocJlWaBW6VRXiYmEt4twneETXeZCuPvbJxNrhNyZAHKHjNR3upSBU3fmHZAQ3TZA3Ky06HjZAoAy1zHpzYewlM20ZD"   # Step 3
-        }
-        api = get_api(cfg)
+        #NEW_ARTICLES = sorted(NEW_ARTICLES, key=lambda art : art.publication_date, reverse=True )
 
-        for NEW_ARTICLE in NEW_ARTICLES:
-            try:
-                status = api.put_wall_post(NEW_ARTICLE)
-            except GraphAPIError:
-                pass
 
-@background(schedule=20)
+        temp = NEW_ARTICLES[-1]
+        attachment = {"name":temp.title ,  "link" :temp.url ,
+                      "description": temp.description}
+        try:
+            status = api.put_wall_post(temp.title, attachment)
+        except GraphAPIError:
+            print("There is a problem ", GraphAPIError)
+
+@background(schedule=60)
 def feed_update():
     """background task to get update from feed """
     FEED_LIST = Feed.objects.all()

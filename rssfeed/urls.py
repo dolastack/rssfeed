@@ -15,15 +15,21 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-
+from clips.tasks import youtube_feed_update, post_video_to_facebook
 from news.tasks import post_to_facebook, feed_update
-from clips.tasks import youtube_feed_update
+
+
 
 #Run the background task to update feed
 #get_articles_to_display(repeat=30)
-#post_to_facebook(repeat=120)
-feed_update(repeat=180)
-youtube_feed_update(repeat=300)
+
+
+
+
+post_to_facebook( repeat=1000 )
+feed_update(repeat=350)
+youtube_feed_update(repeat=900)
+post_video_to_facebook( repeat=1200 )
 
 urlpatterns = [
     url(r'^videos/', include('clips.urls')),

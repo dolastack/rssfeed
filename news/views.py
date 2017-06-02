@@ -24,10 +24,11 @@ def articles_list(request):
     display_list = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
 
     rowsd = [display_list[x:x+1] for x in range(0, len(display_list), 1)]
+
     paginator = Paginator(rowsd, 20)
     page = request.GET.get('page')
     videos = get_videos()
-    video_paginator = Paginator(videos, 15)
+    video_paginator = Paginator(videos, 10)
     try:
         rows = paginator.page(page)
         vid = video_paginator.page(page)

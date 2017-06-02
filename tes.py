@@ -8,7 +8,7 @@ def main():
     }
 
   api = get_api(cfg)
-  msg = " 121 da Hello, world paperboy!, yup!"
+  msg = "Good morning from New York!"
   status = api.put_wall_post(msg)
 
 def get_api(cfg):

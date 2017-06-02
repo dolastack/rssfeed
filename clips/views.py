@@ -15,11 +15,11 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 def videos_list(request):
     videos_list = YoutubeVideo.objects.all().order_by("-publication_date")
 
-    rowsd = [videos_list[x:x+2] for x in range(0, len(videos_list), 1)]
+    rowsd = [videos_list[x:x+1] for x in range(0, len(videos_list), 1)]
 
     paginator = Paginator(rowsd, 20)
     page = request.GET.get('page')
-    print ("the page " , page)
+    
     try:
         videos = paginator.page(page)
     except PageNotAnInteger:
