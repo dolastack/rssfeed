@@ -1,0 +1,4 @@
+celerybeat.pid
+npm-debug.log
+*migrations/
+*__pycache__/

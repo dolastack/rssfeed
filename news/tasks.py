@@ -1,16 +1,17 @@
 from background_task import background
 from .models import  Article, Feed
-import feedparser, datetime, pytz,facebook
+import feedparser, datetime,facebook
 import datetime
-#from rssfeed.settings import DISPLAY_LIST
-#from .views import save_article
+
+from pytz import timezone
 
 from facebook import GraphAPIError
-#from .tasks import feed_update
+from celery.task.schedules import crontab
+from celery.decorators import periodic_task
 
-#Articles to display
-#display_set
 # Create your views here.
+
+
 
 
 DISPLAYED_ARTICLES = []
@@ -34,7 +35,7 @@ def get_api(cfg):
 
 api = get_api(cfg)
 
-@background(schedule=300)
+@periodic_task(run_every=(crontab(hour="*", minute="*/30", day_of_week="*")))
 def post_to_facebook():
     """Post new articles to facebook"""
 
@@ -58,20 +59,20 @@ def post_to_facebook():
             except GraphAPIError:
                 print("There is a problem ", GraphAPIError)
 
-@background(schedule=60)
+#@background(schedule=60)
+@periodic_task(run_every=(crontab(hour="*", minute="*/10", day_of_week="*")))
 def feed_update():
     """background task to get update from feed """
+
     FEED_LIST = Feed.objects.all()
     for feed in FEED_LIST:
         feedData = feedparser.parse(feed.url)
-        if feedData.status == 304:
-            # no changes
-            pass
-        else:
+        try:
             feed.title = feedData.feed.title
-            feed.save()
-            save_article(feedData,feed)
-
+        except AttributeError:
+            feed.title = "No title"
+        feed.save()
+        save_article(feedData,feed)
 
 def save_article(dfeedData, dfeed):
     """ get articles from feeds and save article to database"""
@@ -81,10 +82,16 @@ def save_article(dfeedData, dfeed):
         article.title = entry.title
         article.url = entry.link
         article.description = entry.description
-        ptime = datetime.datetime(*(entry.published_parsed[0:6]), tzinfo=datetime.timezone.utc)
-        ptimetz = ptime.astimezone()
-        dateString = ptimetz.strftime('%Y-%m-%d %H:%M:%S')
-        article.publication_date = dateString
+
+        utc = timezone('UTC')
+        eastern = timezone('US/Eastern')
+        utc_dt = datetime.datetime(*(entry.published_parsed[0:6]), tzinfo=utc)
+        #timezone naive datetime
+        loc_dt = utc_dt.astimezone(eastern)
+
+        #dateString = loc_dt.strftime('%Y-%m-%d %H:%M:%S')
+        #timezone('US/Eastern').localize(dateString)
+        article.publication_date = loc_dt.strftime('%Y-%m-%d %H:%M:%S')
         article.feed = dfeed
         article.setID()
         article.save()

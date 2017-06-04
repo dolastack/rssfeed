@@ -1,11 +1,15 @@
 from .models import YoutubeVideo, YoutubeFeed
 import datetime
 import feedparser, facebook
-from background_task import background
+
+from pytz import timezone
+from celery.task.schedules import crontab
+from celery.decorators import periodic_task
 
 
 DISPLAYED_VIDEOS = []
 # facebook api
+
 
 cfg = {
 "page_id"      : "216809822168608",  # Step 1
@@ -26,12 +30,12 @@ def get_api(cfg):
 
 api = get_api(cfg)
 
-@background(schedule=500)
+@periodic_task(run_every=(crontab(hour="*", minute="*/45", day_of_week="*")))
 def post_video_to_facebook():
     """Post new articles to facebook"""
-    print("sending to face")
+
     NEW_VIDEOS = []
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=60)
+    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=45)
 
     videos = YoutubeVideo.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
     for video in videos:
@@ -57,26 +61,31 @@ def save_video(feedData, video_feed):
         video.description = entry.description
         video.url = entry.link
 
-        ptime = datetime.datetime(*(entry.published_parsed[0:6]), tzinfo=datetime.timezone.utc)
-        ptimetz = ptime.astimezone()
-        dateString = ptimetz.strftime('%Y-%m-%d %H:%M:%S')
-        video.publication_date = dateString
+        utc = timezone('UTC')
+        eastern = timezone('US/Eastern')
+        utc_dt = datetime.datetime(*(entry.published_parsed[0:6]),  tzinfo=utc)
+        #timezone naive datetime
+        loc_dt = utc_dt.astimezone(eastern)
+
+        #dateString = loc_dt.strftime('%Y-%m-%d %H:%M:%S')
+        #timezone('US/Eastern').localize(dateString)
+        video.publication_date = loc_dt.strftime('%Y-%m-%d %H:%M:%S')
+
         video.video_feed = video_feed
         #video.get_embed_code()
         video.setID()
         video.save()
 
-@background(schedule=50)
+#@background(schedule=50)
+@periodic_task(run_every=(crontab(hour="*", minute="*/15", day_of_week="*")))
 def youtube_feed_update():
     """background task to get update from feed """
     FEED_LIST = YoutubeFeed.objects.all()
     for youtube_feed in FEED_LIST:
-
         feedData = feedparser.parse(youtube_feed.full_url)
-        if feedData.status == 304:
-            # no changes
-            pass
-        else:
+        try:
             youtube_feed.title = feedData.feed.title
-            youtube_feed.save()
-            save_video(feedData, youtube_feed)
+        except AttributeError:
+            youtube_feed.title = "No title"
+        youtube_feed.save()
+        save_video(feedData, youtube_feed)

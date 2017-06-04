@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'news.apps.NewsConfig',
     'background_task',
     'clips.apps.ClipsConfig',
-    'embed_video',
+    #'channels',
+    'djcelery',
+    'kombu.transport.django',
 ]
 
 MIDDLEWARE = [
@@ -140,13 +142,24 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 DISPLAY_LIST = []
+"""
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+        },
+        "ROUTING": "rssfeed.routing.channel_routing",
+    },
+}
+"""
 
 
-EMBED_VIDEO_BACKENDS = (
-    'embed_video.backends.YoutubeBackend',
-    'embed_video.backends.VimeoBackend',
-    'embed_video.backends.SoundCloudBackend',
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 
-)
 
-#STATICFILES_DIRS = [    os.path.join(BASE_DIR, 'static')]
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'

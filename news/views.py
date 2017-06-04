@@ -14,6 +14,10 @@ from django.conf import settings
 #from rssfeed.settings import display_list
 from clips.views import get_videos
 
+from channels import Channel
+
+
+
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 display_list = getattr(settings, 'DISPLAY_LIST')
 
