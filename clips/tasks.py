@@ -6,10 +6,12 @@ from pytz import timezone
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 
+import pickle, redis
 
 DISPLAYED_VIDEOS = []
 # facebook api
 
+redis = redis.StrictRedis(host='localhost', port=6379, db=9)
 
 cfg = {
 "page_id"      : "216809822168608",  # Step 1
@@ -29,27 +31,28 @@ def get_api(cfg):
   return graph
 
 api = get_api(cfg)
-
-@periodic_task(run_every=(crontab(hour="*", minute="*/45", day_of_week="*")))
-def post_video_to_facebook():
-    """Post new articles to facebook"""
-
-    NEW_VIDEOS = []
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=45)
-
+#periodically get new videos
+@periodic_task(run_every=(crontab( minute="*/18")))
+def get_latest_videos():
+    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=20)
     videos = YoutubeVideo.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
     for video in videos:
-        if video not in DISPLAYED_VIDEOS:
-            NEW_VIDEOS.append(video)
-            DISPLAYED_VIDEOS.append(video)
-    print ("the lenght here" ,len(NEW_VIDEOS), " and ", len(DISPLAYED_VIDEOS))
-    if  len(NEW_VIDEOS) > 0:
-        #NEW_ARTICLES = sorted(NEW_ARTICLES, key=lambda art : art.publication_date, reverse=True )
-        for temp in NEW_VIDEOS:
-            attachment = {"name":temp.title ,  "link" :temp.url ,
-                          "description": temp.description}
+
+        video_pickled = pickle.dumps(video)
+        redis.lpush('videos', video_pickled)
+
+@periodic_task(run_every=(crontab( minute="*/39")))
+def post_video_to_facebook():
+    """Post new articles to facebook"""
+    for i in range(2):
+        if redis.llen('videos') > 0:
+            #get the first element
+            video_unpickled = redis.rpop('videos')
+            video = pickle.loads(video_unpickled)
+
+            attachment = {"name":video.title ,  "link" :video.url , "description": video.description}
             try:
-                status = api.put_wall_post(temp.title, attachment )
+                status = api.put_wall_post(video.title, attachment )
             except facebook.GraphAPIError:
                 print("There is a problem ", GraphAPIError)
 
@@ -77,7 +80,7 @@ def save_video(feedData, video_feed):
         video.save()
 
 #@background(schedule=50)
-@periodic_task(run_every=(crontab(hour="*", minute="*/15", day_of_week="*")))
+@periodic_task(run_every=(crontab(minute="*/15")))
 def youtube_feed_update():
     """background task to get update from feed """
     FEED_LIST = YoutubeFeed.objects.all()

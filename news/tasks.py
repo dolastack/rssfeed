@@ -9,10 +9,13 @@ from facebook import GraphAPIError
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 
+import redis
+import pickle
 # Create your views here.
 
 
 
+redis = redis.StrictRedis(host='localhost', port=6379, db=9)
 
 DISPLAYED_ARTICLES = []
 # facebook api
@@ -35,32 +38,36 @@ def get_api(cfg):
 
 api = get_api(cfg)
 
-@periodic_task(run_every=(crontab(hour="*", minute="*/30", day_of_week="*")))
-def post_to_facebook():
-    """Post new articles to facebook"""
-
-    NEW_ARTICLES = []
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=30)
-
+#periodically get new videos
+@periodic_task(run_every=(crontab( minute="*/15")))
+def get_latest_articles():
+    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=15)
     articles = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
     for article in articles:
-        if article not in DISPLAYED_ARTICLES:
-            NEW_ARTICLES.append(article)
-            DISPLAYED_ARTICLES.append(article)
+        pickled_article = pickle.dumps(article)
+        redis.lpush('articles', pickled_article)
+    print("the length ", len(DISPLAYED_ARTICLES))
 
-    if  len(NEW_ARTICLES) > 0:
-        #NEW_ARTICLES = sorted(NEW_ARTICLES, key=lambda art : art.publication_date, reverse=True )
-        for temp in NEW_ARTICLES:
+@periodic_task(run_every=(crontab( minute="*/32")))
+def post_to_facebook():
+    """Post new articles to facebook"""
+    print("the length ", len(DISPLAYED_ARTICLES))
+    for i in range(2):
+        if redis.llen('articles') > 0:
+            #get the first element
+            #article = DISPLAYED_ARTICLES.pop(0)
+            article_unpickled = redis.rpop('articles')
+            article = pickle.loads(article_unpickled)
 
-            attachment = {"name":temp.title ,  "link" :temp.url ,
-                          "description": temp.description}
+            attachment = {"name":article.title ,  "link" :article.url , "description": article.description}
             try:
-                status = api.put_wall_post(temp.title, attachment)
-            except GraphAPIError:
+                status = api.put_wall_post(article.title, attachment )
+            except facebook.GraphAPIError:
                 print("There is a problem ", GraphAPIError)
 
+
 #@background(schedule=60)
-@periodic_task(run_every=(crontab(hour="*", minute="*/10", day_of_week="*")))
+@periodic_task(run_every=(crontab(minute="*/10")))
 def feed_update():
     """background task to get update from feed """
 
