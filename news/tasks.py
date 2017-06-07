@@ -17,7 +17,7 @@ import pickle
 
 redis = redis.StrictRedis(host='localhost', port=6379, db=9)
 
-DISPLAYED_ARTICLES = []
+
 # facebook api
 cfg = {
 "page_id"      : "216809822168608",  # Step 1
@@ -39,20 +39,23 @@ def get_api(cfg):
 api = get_api(cfg)
 
 #periodically get new videos
-@periodic_task(run_every=(crontab( minute="*/15")))
+@periodic_task(run_every=(crontab( minute="*/10")))
 def get_latest_articles():
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=15)
+    DISPLAYED_ARTICLES = []
+    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=10)
     articles = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
+    current_list = redis.lrange('articles',0, -1)
     for article in articles:
         pickled_article = pickle.dumps(article)
-        redis.lpush('articles', pickled_article)
-    print("the length ", len(DISPLAYED_ARTICLES))
+        if pickled_article not in current_list:
+            redis.lpush('articles', pickled_article)
 
-@periodic_task(run_every=(crontab( minute="*/32")))
+
+@periodic_task(run_every=(crontab( minute="*/15")))
 def post_to_facebook():
     """Post new articles to facebook"""
-    print("the length ", len(DISPLAYED_ARTICLES))
-    for i in range(2):
+    
+    for i in range(5):
         if redis.llen('articles') > 0:
             #get the first element
             #article = DISPLAYED_ARTICLES.pop(0)
@@ -67,10 +70,9 @@ def post_to_facebook():
 
 
 #@background(schedule=60)
-@periodic_task(run_every=(crontab(minute="*/10")))
+@periodic_task(run_every=(crontab(minute="*/8")))
 def feed_update():
     """background task to get update from feed """
-
     FEED_LIST = Feed.objects.all()
     for feed in FEED_LIST:
         feedData = feedparser.parse(feed.url)
