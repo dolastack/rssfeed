@@ -8,7 +8,6 @@ from django.views.decorators.cache import cache_page
 # Create your views here.
 import datetime
 
-
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 @cache_page(CACHE_TTL)
@@ -19,7 +18,7 @@ def videos_list(request):
 
     paginator = Paginator(rowsd, 20)
     page = request.GET.get('page')
-    
+
     try:
         videos = paginator.page(page)
     except PageNotAnInteger:
@@ -32,6 +31,4 @@ def videos_list(request):
     return render(request, template, context)
 
 def get_videos():
-    time_delta = datetime.datetime.now() - datetime.timedelta(days=7)
-    videos = YoutubeVideo.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
-    return videos
+     return YoutubeVideo.objects.videos_after( days=7)

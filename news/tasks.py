@@ -14,15 +14,15 @@ import pickle
 # Create your views here.
 
 
-
 redis = redis.StrictRedis(host='localhost', port=6379, db=9)
-
 
 # facebook api
 cfg = {
 "page_id"      : "216809822168608",  # Step 1
 "access_token" : "EAAL3F6fnlNkBAMXksivgtM6XFSZBcbmHRJUG3MogBPz2hsuZAPXaG0ky8C1TbxZAJZAOCgT5V2hFocJlWaBW6VRXiYmEt4twneETXeZCuPvbJxNrhNyZAHKHjNR3upSBU3fmHZAQ3TZA3Ky06HjZAoAy1zHpzYewlM20ZD"   # Step 3
 }
+
+DISPLAYED_ARTICLES = []
 
 def get_api(cfg):
   graph = facebook.GraphAPI(cfg['access_token'])
@@ -41,32 +41,31 @@ api = get_api(cfg)
 #periodically get new videos
 @periodic_task(run_every=(crontab( minute="*/10")))
 def get_latest_articles():
-    DISPLAYED_ARTICLES = []
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=10)
-    articles = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
-    current_list = redis.lrange('articles',0, -1)
+
+
+    articles = Article.objects.articles_after(minutes=10)
+    #current_list = redis.lrange('articles',0, -1)
     for article in articles:
-        pickled_article = pickle.dumps(article)
-        if pickled_article not in current_list:
-            redis.lpush('articles', pickled_article)
+        if article.article_id not in DISPLAYED_ARTICLES:
+            redis.lpush('articles', article.article_id )
+            DISPLAYED_ARTICLES.append(article.article_id)
 
 
 @periodic_task(run_every=(crontab( minute="*/15")))
 def post_to_facebook():
     """Post new articles to facebook"""
-    
+
     for i in range(5):
         if redis.llen('articles') > 0:
             #get the first element
-            #article = DISPLAYED_ARTICLES.pop(0)
-            article_unpickled = redis.rpop('articles')
-            article = pickle.loads(article_unpickled)
+            #articleID = redis.rpop('articles')
+            article = Article.objects.get(article_id = redis.rpop('articles'))
 
             attachment = {"name":article.title ,  "link" :article.url , "description": article.description}
             try:
                 status = api.put_wall_post(article.title, attachment )
-            except facebook.GraphAPIError:
-                print("There is a problem ", GraphAPIError)
+            except facebook.GraphAPIError as er:
+                print("There is a problem ", str(er))
 
 
 #@background(schedule=60)

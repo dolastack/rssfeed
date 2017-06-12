@@ -24,8 +24,8 @@ display_list = getattr(settings, 'DISPLAY_LIST')
 
 @cache_page(CACHE_TTL)
 def articles_list(request):
-    time_delta = datetime.datetime.now() - datetime.timedelta(days=15)
-    display_list = Article.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
+    
+    display_list = Article.objects.articles_after(days=10)
 
     rowsd = [display_list[x:x+1] for x in range(0, len(display_list), 1)]
 

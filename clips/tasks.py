@@ -34,28 +34,29 @@ api = get_api(cfg)
 #periodically get new videos
 @periodic_task(run_every=(crontab( minute="*/10")))
 def get_latest_videos():
-    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=10)
-    videos = YoutubeVideo.objects.filter(publication_date__gte = time_delta).order_by("-publication_date")
+
+    videos = YoutubeVideo.objects.videos_after(minutes=10)
     current_list = redis.lrange('videos',0, -1)
     for video in videos:
-        pickled_video = pickle.dumps(video)
-        if pickled_video not in current_list:
-            redis.lpush('videos', pickled_video)
+        #pickled_video = pickle.dumps(video)
+        if video.video_id not in DISPLAYED_VIDEOS:
+            redis.lpush('videos', video.video_id )
+            DISPLAYED_VIDEOS.append(video.video_id)
 
 @periodic_task(run_every=(crontab( minute="*/23")))
 def post_video_to_facebook():
     """Post new articles to facebook"""
-    for i in range(3):
+    for i in range(1):
         if redis.llen('videos') > 0:
             #get the first element
-            pickled_video = redis.rpop('videos')
-            video = pickle.loads(pickled_video)
+            #videoID = redis.rpop('videos')
+            video = YoutubeVideo.objects.get(video_id = redis.rpop('videos'))
 
             attachment = {"name":video.title ,  "link" :video.url , "description": video.description}
             try:
                 status = api.put_wall_post(video.title, attachment )
-            except facebook.GraphAPIError:
-                print("There is a problem ", GraphAPIError)
+            except facebook.GraphAPIError as er:
+                print("There is a problem ", str(er))
 
 
 def save_video(feedData, video_feed):

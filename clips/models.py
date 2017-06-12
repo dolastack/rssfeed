@@ -1,6 +1,6 @@
 from django.db import models
 import hashlib
-import re
+import re, datetime
 # Create your models here.
 
 class VideoFeed(models.Model):
@@ -30,7 +30,21 @@ class Video(models.Model):
         idm.update(temp.encode())
         self.video_id = idm.hexdigest()
 
+class YoutubeVideoManager(models.Manager):
+    def videos_after(self, **kwargs):
+
+        if kwargs is not None:
+            for duration, value in kwargs.items():
+                if duration == "minutes":
+                    time_delta = datetime.datetime.now() - datetime.timedelta(minutes=value)
+                elif duration == "days":
+                    time_delta = datetime.datetime.now() - datetime.timedelta(days=value)
+                elif duration == "hours":
+                    time_delta = datetime.datetime.now() - datetime.timedelta(hours=value)
+                return self.filter(publication_date__gte = time_delta).order_by("-publication_date")
+
 class YoutubeVideo(Video):
+    objects = YoutubeVideoManager()
     @property
     def embed_code(self):
         regex_str = r'(https:\/\/www.youtube.com\/)watch\?v\=(.+)'
