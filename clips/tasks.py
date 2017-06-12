@@ -36,7 +36,7 @@ api = get_api(cfg)
 def get_latest_videos():
 
     videos = YoutubeVideo.objects.videos_after(minutes=10)
-    current_list = redis.lrange('videos',0, -1)
+    #current_list = redis.lrange('videos',0, -1)
     for video in videos:
         #pickled_video = pickle.dumps(video)
         if video.video_id not in DISPLAYED_VIDEOS:
