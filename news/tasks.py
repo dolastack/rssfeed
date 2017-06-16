@@ -57,8 +57,7 @@ def post_to_facebook():
 
     for i in range(5):
         if redis.llen('articles') > 0:
-            #get the first element
-            #articleID = redis.rpop('articles')
+            
             article = Article.objects.get(article_id = redis.rpop('articles'))
 
             attachment = {"name":article.title ,  "link" :article.url , "description": article.description}
