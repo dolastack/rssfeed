@@ -68,7 +68,6 @@ def post_to_facebook():
                 print("There is a problem ", str(er))
 
 
-#@background(schedule=60)
 @periodic_task(run_every=(crontab(minute="*/8")))
 def feed_update():
     """background task to get update from feed """
