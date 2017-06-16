@@ -46,7 +46,7 @@ def get_latest_videos():
 @periodic_task(run_every=(crontab( minute="*/23")))
 def post_video_to_facebook():
     """Post new articles to facebook"""
-    for i in range(1):
+    for i in range(2):
         if redis.llen('videos') > 0:
             #get the first element
 
