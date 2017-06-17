@@ -39,17 +39,14 @@ def get_api(cfg):
 api = get_api(cfg)
 
 #periodically get new videos
-@periodic_task(run_every=(crontab( minute="*/10")))
-def get_latest_articles():
+def get_latest_article(sender,  **kwargs):
+    #videos = YoutubeVideo.objects.videos_after(minutes=12)
+    if kwargs['created']:
+        article = kwargs['instance']
+        redis.lpush('videos', article.article.article_id )
 
-
-    articles = Article.objects.articles_after(minutes=10)
-    #current_list = redis.lrange('articles',0, -1)
-    for article in articles:
-        if article.article_id not in DISPLAYED_ARTICLES:
-            redis.lpush('articles', article.article_id )
-            DISPLAYED_ARTICLES.append(article.article_id)
-
+#post save signal connect
+post_save.connect(get_latest_article, sender=Article)
 
 @periodic_task(run_every=(crontab( minute="*/15")))
 def post_to_facebook():
@@ -57,7 +54,7 @@ def post_to_facebook():
 
     for i in range(5):
         if redis.llen('articles') > 0:
-            
+
             article = Article.objects.get(article_id = redis.rpop('articles'))
 
             attachment = {"name":article.title ,  "link" :article.url , "description": article.description}

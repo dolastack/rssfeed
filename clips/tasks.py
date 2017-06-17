@@ -1,14 +1,14 @@
 from .models import YoutubeVideo, YoutubeFeed
 import datetime
 import feedparser, facebook
-
+from django.db.models.signals import post_save
 from pytz import timezone
 from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 
 import pickle, redis
 
-DISPLAYED_VIDEOS = []
+
 # facebook api
 
 redis = redis.StrictRedis(host='localhost', port=6379, db=9)
@@ -32,16 +32,16 @@ def get_api(cfg):
 #get API
 api = get_api(cfg)
 
-@periodic_task(run_every=(crontab( minute="*/20")))
-def get_latest_videos():
+#periodically get new videos
+def get_latest_video(sender,  **kwargs):
+    #videos = YoutubeVideo.objects.videos_after(minutes=12)
+    if kwargs['created']:
+        video = kwargs['instance']
+        redis.lpush('videos', video.video_id )
 
-    videos = YoutubeVideo.objects.videos_after(minutes=20)
+#post save signal connect
+post_save.connect(get_latest_video, sender=YoutubeVideo)
 
-    for video in videos:
-
-        if video.video_id not in DISPLAYED_VIDEOS:
-            redis.lpush('videos', video.video_id )
-            DISPLAYED_VIDEOS.append(video.video_id)
 
 @periodic_task(run_every=(crontab( minute="*/23")))
 def post_video_to_facebook():
