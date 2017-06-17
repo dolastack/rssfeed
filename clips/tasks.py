@@ -8,7 +8,6 @@ from celery.decorators import periodic_task
 
 import pickle, redis
 
-
 # facebook api
 
 redis = redis.StrictRedis(host='localhost', port=6379, db=9)

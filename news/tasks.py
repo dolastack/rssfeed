@@ -2,7 +2,7 @@ from background_task import background
 from .models import  Article, Feed
 import feedparser, datetime,facebook
 import datetime
-
+from django.db.models.signals import post_save
 from pytz import timezone
 
 from facebook import GraphAPIError
@@ -43,7 +43,8 @@ def get_latest_article(sender,  **kwargs):
     #videos = YoutubeVideo.objects.videos_after(minutes=12)
     if kwargs['created']:
         article = kwargs['instance']
-        redis.lpush('videos', article.article.article_id )
+        
+        redis.lpush('articles', article.article_id )
 
 #post save signal connect
 post_save.connect(get_latest_article, sender=Article)
@@ -55,7 +56,7 @@ def post_to_facebook():
     for i in range(5):
         if redis.llen('articles') > 0:
 
-            article = Article.objects.get(article_id = redis.rpop('articles'))
+            article = Article.objects.get(article_id = redis.lpop('articles'))
 
             attachment = {"name":article.title ,  "link" :article.url , "description": article.description}
             try:
@@ -64,7 +65,7 @@ def post_to_facebook():
                 print("There is a problem ", str(er))
 
 
-@periodic_task(run_every=(crontab(minute="*/8")))
+@periodic_task(run_every=(crontab(minute="*/7")))
 def feed_update():
     """background task to get update from feed """
     FEED_LIST = Feed.objects.all()
