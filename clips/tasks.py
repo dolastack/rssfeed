@@ -49,7 +49,7 @@ def post_video_to_facebook():
         if redis.llen('videos') > 0:
             #get the first element
 
-            video = YoutubeVideo.objects.get(video_id = redis.rpop('videos'))
+            video = YoutubeVideo.objects.get(video_id = redis.lpop('videos'))
 
             attachment = {"name":video.title ,  "link" :video.url , "description": video.description}
             try:
