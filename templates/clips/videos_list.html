@@ -8,11 +8,13 @@
 
   {% for row in videos  %}
   <div class="col-md-4">
-    <div class="panel panel-primary">
-    {% for video in row %}
-     <h4>{{ video.title }}</h4>
-    <iframe  width="350" height="320" src="{{ video.embed_code }}" frameborder="0"></iframe>
-    {% endfor %}
+  <div class="panel panel-primary">
+    <div class="panel-body" style="height: 720px; overflow-y:scroll;overflow-x:scroll">
+      {% for video in row %}
+       <h4>{{ video.title }}</h4>
+      <iframe  width="350" height="320" src="{{ video.embed_code }}" frameborder="0"></iframe>
+      {% endfor %}
+    </div>
   </div>
   </div>
 
