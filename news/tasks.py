@@ -43,13 +43,13 @@ def get_latest_article(sender,  **kwargs):
     #videos = YoutubeVideo.objects.videos_after(minutes=12)
     if kwargs['created']:
         article = kwargs['instance']
-        
+
         redis.lpush('articles', article.article_id )
 
 #post save signal connect
 post_save.connect(get_latest_article, sender=Article)
 
-@periodic_task(run_every=(crontab( minute="*/15")))
+@periodic_task(run_every=(crontab( minute="*/18")))
 def post_to_facebook():
     """Post new articles to facebook"""
 

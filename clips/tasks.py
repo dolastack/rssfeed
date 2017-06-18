@@ -45,7 +45,7 @@ post_save.connect(get_latest_video, sender=YoutubeVideo)
 @periodic_task(run_every=(crontab( minute="*/23")))
 def post_video_to_facebook():
     """Post new articles to facebook"""
-    for i in range(2):
+    for i in range(1):
         if redis.llen('videos') > 0:
             #get the first element
 
