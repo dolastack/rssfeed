@@ -1,6 +1,5 @@
 celerybeat.pid
 npm-debug.log
-clips/migrations/*
-news/migrations/*
-clips/__pycache__/*
-news/__pycache__/*
+*settings.py
+*__pycache__
+*.pyc
